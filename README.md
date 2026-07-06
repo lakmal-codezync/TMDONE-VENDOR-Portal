@@ -10,17 +10,25 @@ Playwright end-to-end test automation suite for the TMDONE Vendor Portal.
 
 ## Screenshots
 
-### Dashboard
+| Login | Dashboard |
+| --- | --- |
+| ![Login](docs/screenshots/login.png) | ![Dashboard](docs/screenshots/dashboard.png) |
 
-![Dashboard](docs/screenshots/dashboard.png)
+| Vendor Performance | Branch Details |
+| --- | --- |
+| ![Vendor Performance](docs/screenshots/vendor-performance.png) | ![Branch Details](docs/screenshots/branch-details.png) |
 
-### Reports
+| Menu Management | Order Management |
+| --- | --- |
+| ![Menu Management](docs/screenshots/menu-management.png) | ![Order Management](docs/screenshots/order-management.png) |
 
-![Reports](docs/screenshots/reports.png)
+| Stores Ratings | Stores Ratings Summary |
+| --- | --- |
+| ![Stores Ratings](docs/screenshots/stores-ratings.png) | ![Stores Ratings Summary](docs/screenshots/stores-ratings-summary.png) |
 
-### Smart Boost Campaign
-
-![Smart Boost Campaign](docs/screenshots/smart-boost-campaign.png)
+| Reports | Smart Boost Campaign |
+| --- | --- |
+| ![Reports](docs/screenshots/reports.png) | ![Smart Boost Campaign](docs/screenshots/smart-boost-campaign.png) |
 
 ## Covered Areas
 
