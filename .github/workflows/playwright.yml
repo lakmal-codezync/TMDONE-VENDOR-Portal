@@ -9,9 +9,21 @@ on:
 
 jobs:
   test:
-    name: E2E Tests
-    timeout-minutes: 60
+    name: E2E Tests (${{ matrix.shard }})
+    timeout-minutes: 75
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard: 1/4
+            shard-name: shard-1
+          - shard: 2/4
+            shard-name: shard-2
+          - shard: 3/4
+            shard-name: shard-3
+          - shard: 4/4
+            shard-name: shard-4
 
     env:
       VENDOR_PORTAL_BASE_URL: ${{ secrets.VENDOR_PORTAL_BASE_URL || 'https://partner.demo.dr.tmd1.org' }}
@@ -20,10 +32,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: lts/*
           cache: npm
@@ -35,13 +47,13 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run Playwright tests
-        run: npm test
+        run: npm run test:ci -- --shard=${{ matrix.shard }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard-name }}
           path: playwright-report/
           retention-days: 30
 
@@ -49,6 +61,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
-          name: test-results
+          name: test-results-${{ matrix.shard-name }}
           path: test-results/
           retention-days: 14
