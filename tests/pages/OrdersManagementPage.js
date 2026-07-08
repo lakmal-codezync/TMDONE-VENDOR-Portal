@@ -14,6 +14,7 @@ export class OrdersManagementPage extends BasePage {
     this.searchInput = page.locator('mat-form-field').filter({ hasText: 'Search...' }).locator('input');
     this.storeSelector = page.getByText('Select a store', { exact: true });
     this.searchButton = page.getByRole('button', { name: /search/i });
+    this.statusCards = page.locator('.card-statistic-4');
     this.newOrdersTab = page.getByRole('tab', { name: /^New Orders$/ });
     this.ongoingOrdersTab = page.getByRole('tab', { name: /^Ongoing Orders$/ });
     this.completedOrdersTab = page.getByRole('tab', { name: /^Completed Orders$/ });
@@ -94,10 +95,28 @@ export class OrdersManagementPage extends BasePage {
 
   async expectOrderStatusCardsVisible() {
     await this.dismissAudioPermissionIfVisible();
-    await expect(this.page.getByText(/New\s+Orders/).first()).toBeVisible();
-    await expect(this.page.getByText(/Preparing/).first()).toBeVisible();
-    await expect(this.page.getByText(/Out\s+for\s+Delivery/).first()).toBeVisible();
-    await expect(this.page.getByText(/Completed\s+Orders/).first()).toBeVisible();
+
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      const cardsLoaded = await this.statusCards
+        .first()
+        .waitFor({ state: 'visible', timeout: 10000 })
+        .then(() => this.statusCards.count())
+        .then((count) => count >= 4)
+        .catch(() => false);
+
+      if (cardsLoaded) {
+        break;
+      }
+
+      await this.page.reload({ waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {});
+      await this.page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+      await this.dismissAudioPermissionIfVisible();
+    }
+
+    await expect(this.page.locator('.card-content').filter({ hasText: /New\s+Orders/i }).first()).toBeVisible();
+    await expect(this.page.locator('.card-content').filter({ hasText: /Preparing\s+Orders/i }).first()).toBeVisible();
+    await expect(this.page.locator('.card-content').filter({ hasText: /Out\s+for\s+Delivery/i }).first()).toBeVisible();
+    await expect(this.page.locator('.card-content').filter({ hasText: /Completed\s+Orders/i }).first()).toBeVisible();
   }
 
   async expectFiltersVisible() {

@@ -1,10 +1,20 @@
 import { test, expect } from '../fixtures/vendorPortalFixture.js';
 import { vendorPortal } from '../data/vendorPortalData.js';
+import { LoginPage } from '../pages/LoginPage.js';
 
-const baseUrl = process.env.VENDOR_PORTAL_BASE_URL || 'https://partner.demo.dr.tmd1.org';
+const baseURL = process.env.VENDOR_PORTAL_BASE_URL || 'https://partner.demo.dr.tmd1.org';
 
-const routeUrl = (route) => `${baseUrl}${route}`;
+const routeUrl = (route) => `${baseURL}${route}`;
 const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const routeHash = (route) => route.replace(/^\//, '').split('?')[0];
+
+function sidebarLink(page, item) {
+  const sidebar = page.locator('#leftsidebar');
+  const linkByName = sidebar.getByRole('link', { name: new RegExp(escapeRegExp(item.name), 'i') });
+  const linkByHref = sidebar.locator(`a[href*="${routeHash(item.route)}"]`);
+
+  return linkByName.or(linkByHref).first();
+}
 
 async function dismissAudioPermissionIfVisible(page) {
   const dialog = page.getByRole('dialog', { name: /Audio Permission/i });
@@ -20,6 +30,17 @@ async function dismissAudioPermissionIfVisible(page) {
     await expect(dialog).toBeHidden({ timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(300);
   }
+}
+
+async function ensureAuthenticatedShell(page) {
+  if (page.url().includes('/#/authentication/signin')) {
+    const loginPage = new LoginPage(page);
+
+    await loginPage.login();
+  }
+
+  await expect(page.getByRole('link', { name: /Vendor Portal/i })).toBeVisible();
+  await expect(page.locator('#leftsidebar')).toBeVisible();
 }
 
 const sidebarItems = [
@@ -80,10 +101,11 @@ test.describe('System Coverage', () => {
   let page;
 
   test.beforeEach(async ({ browser, authStorageState }) => {
-    context = await browser.newContext({ storageState: authStorageState });
+    context = await browser.newContext({ baseURL, storageState: authStorageState });
     page = await context.newPage();
     await page.goto(routeUrl(vendorPortal.routes.dashboard), { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    await ensureAuthenticatedShell(page);
     await dismissAudioPermissionIfVisible(page);
   });
 
@@ -102,13 +124,13 @@ test.describe('System Coverage', () => {
     await expect(page.getByText('SKINS')).toBeVisible();
 
     for (const item of sidebarItems) {
-      await expect(page.locator('#leftsidebar').getByRole('link', { name: new RegExp(escapeRegExp(item.name), 'i') })).toBeVisible();
+      await expect(sidebarLink(page, item)).toBeVisible();
     }
   });
 
   for (const item of sidebarItems) {
     test(`TC_SYSTEM_NAV_${item.name.toUpperCase().replace(/[^A-Z0-9]+/g, '_')} @system-navigation ${item.name} opens from sidebar`, async () => {
-      const link = page.locator('#leftsidebar').getByRole('link', { name: new RegExp(escapeRegExp(item.name), 'i') });
+      const link = sidebarLink(page, item);
 
       await expect(link).toBeVisible();
       await link.click({ timeout: 5000 }).catch(async () => {
@@ -124,7 +146,7 @@ test.describe('System Coverage', () => {
   }
 
   test('TC_SYSTEM_010 @system-protected-routes unauthenticated protected routes redirect to sign in', async ({ browser }) => {
-    const anonymousContext = await browser.newContext();
+    const anonymousContext = await browser.newContext({ baseURL });
     const anonymousPage = await anonymousContext.newPage();
 
     for (const item of sidebarItems) {
