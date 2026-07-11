@@ -5,24 +5,30 @@ import { LoginPage } from '../pages/LoginPage.js';
 const baseURL = process.env.VENDOR_PORTAL_BASE_URL || 'https://partner.demo.dr.tmd1.org';
 
 test.describe('Smart Boost Campaign', () => {
-  test.describe.configure({ timeout: 120000 });
+  test.describe.configure({ mode: 'serial', timeout: 120000 });
 
   let context;
+  let page;
   let smartBoostCampaignPage;
 
-  test.beforeEach(async ({ browser }) => {
+  test.beforeAll(async ({ browser }) => {
+    test.setTimeout(180000);
+
     context = await browser.newContext({ baseURL });
-    const page = await context.newPage();
+    page = await context.newPage();
     const loginPage = new LoginPage(page);
 
     await loginPage.goto();
     await loginPage.login();
     smartBoostCampaignPage = new SmartBoostCampaignPage(page);
-    await smartBoostCampaignPage.goto();
   });
 
-  test.afterEach(async () => {
+  test.afterAll(async () => {
     await context?.close();
+  });
+
+  test.beforeEach(async () => {
+    await smartBoostCampaignPage.goto();
   });
 
   test('TC_SMART_BOOST_001 @smart-boost-load page loads with correct URL and heading', async () => {

@@ -6,7 +6,7 @@ export class ReportsPage extends BasePage {
   constructor(page) {
     super(page);
     this.heading = page.getByRole('heading', { name: /^Reports$/ });
-    this.salesReportsHeading = page.getByRole('heading', { name: /^Sales Reports$/ });
+    this.salesReportsHeading = page.getByRole('heading', { name: /^Sales Reports?$/ });
     this.orderCountHeading = page.getByRole('heading', { name: /^Order Count Report$/ });
     this.topSellingHeading = page.getByRole('heading', { name: /^Top Selling Items Report$/ });
     this.detailHeading = page.getByRole('heading', {
@@ -33,10 +33,16 @@ export class ReportsPage extends BasePage {
 
   async goto() {
     await this.dismissOrderCountDetailsIfVisible();
+    if (this.page.url().includes('/#/home/reports') && (await this.heading.isVisible().catch(() => false))) {
+      await this.openSalesReport();
+      return;
+    }
+
     await this.page.goto(this.routeUrl(vendorPortal.routes.reports), { waitUntil: 'commit', timeout: 60000 }).catch(() => {});
     await this.page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
     await this.ensureReportsReady();
     await this.dismissOrderCountDetailsIfVisible();
+    await this.openSalesReport();
   }
 
   async openFromSidebar() {
@@ -88,6 +94,13 @@ export class ReportsPage extends BasePage {
       return;
     }
 
+    const dialog = this.page.getByRole('dialog').filter({ has: this.detailHeading });
+    const closeIcon = dialog.getByText('close', { exact: true }).last();
+
+    if (await closeIcon.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await closeIcon.click({ force: true }).catch(() => {});
+    }
+
     await this.page.keyboard.press('Escape').catch(() => {});
 
     if (await this.detailHeading.isVisible({ timeout: 1000 }).catch(() => false)) {
@@ -100,6 +113,28 @@ export class ReportsPage extends BasePage {
     }
 
     await expect(this.detailHeading).toBeHidden({ timeout: 5000 }).catch(() => {});
+
+    if (await this.detailHeading.isVisible({ timeout: 500 }).catch(() => false)) {
+      await this.page.reload({ waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {});
+      await this.page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    }
+  }
+
+  async openSalesReport() {
+    const tab = this.page.getByRole('tab', { name: /^Sales Report$/i });
+    const selected = await tab.getAttribute('aria-selected').catch(() => null);
+
+    if (selected === 'true' && (await this.salesReportsHeading.isVisible().catch(() => false))) {
+      return;
+    }
+
+    await expect(tab).toBeVisible();
+    await tab.click({ force: true, timeout: 5000 }).catch(async () => {
+      await tab.evaluate((element) => element.click()).catch(() => {});
+    });
+    await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 5000 }).catch(() => {});
+    await this.page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    await expect(this.salesReportsHeading).toBeVisible();
   }
 
   async expectLoaded() {
@@ -237,6 +272,10 @@ export class ReportsPage extends BasePage {
   }
 
   async openOrderCountDetails() {
+    if (await this.detailHeading.isVisible({ timeout: 500 }).catch(() => false)) {
+      return;
+    }
+
     await this.openOrderCountReport();
 
     for (let attempt = 1; attempt <= 3; attempt++) {

@@ -5,24 +5,38 @@ import { LoginPage } from '../pages/LoginPage.js';
 const baseURL = process.env.VENDOR_PORTAL_BASE_URL || 'https://partner.demo.dr.tmd1.org';
 
 test.describe('Reports', () => {
-  test.describe.configure({ timeout: 120000 });
+  test.describe.configure({ mode: 'serial', timeout: 120000 });
 
   let context;
+  let page;
   let reportsPage;
 
-  test.beforeEach(async ({ browser }) => {
+  test.beforeAll(async ({ browser }) => {
+    test.setTimeout(180000);
+
     context = await browser.newContext({ baseURL });
-    const page = await context.newPage();
+    page = await context.newPage();
     const loginPage = new LoginPage(page);
 
     await loginPage.goto();
     await loginPage.login();
     reportsPage = new ReportsPage(page);
-    await reportsPage.goto();
+  });
+
+  test.afterAll(async () => {
+    await context?.close();
   });
 
   test.afterEach(async () => {
-    await context?.close();
+    if (await reportsPage?.detailHeading.isVisible({ timeout: 500 }).catch(() => false)) {
+      await page.close().catch(() => {});
+      page = await context.newPage();
+      reportsPage = new ReportsPage(page);
+    }
+  });
+
+  test.beforeEach(async () => {
+    await reportsPage.goto();
   });
 
   test('TC_REPORTS_001 @reports-load page loads with correct URL and heading', async () => {
