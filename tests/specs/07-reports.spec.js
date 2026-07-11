@@ -1,5 +1,8 @@
 import { test } from '../fixtures/vendorPortalFixture.js';
 import { ReportsPage } from '../pages/ReportsPage.js';
+import { LoginPage } from '../pages/LoginPage.js';
+
+const baseURL = process.env.VENDOR_PORTAL_BASE_URL || 'https://partner.demo.dr.tmd1.org';
 
 test.describe('Reports', () => {
   test.describe.configure({ timeout: 120000 });
@@ -7,10 +10,13 @@ test.describe('Reports', () => {
   let context;
   let reportsPage;
 
-  test.beforeEach(async ({ browser, authStorageState }) => {
-    context = await browser.newContext({ storageState: authStorageState });
+  test.beforeEach(async ({ browser }) => {
+    context = await browser.newContext({ baseURL });
     const page = await context.newPage();
+    const loginPage = new LoginPage(page);
 
+    await loginPage.goto();
+    await loginPage.login();
     reportsPage = new ReportsPage(page);
     await reportsPage.goto();
   });

@@ -28,39 +28,52 @@ async function authStateWorks(browser) {
 
   const context = await browser.newContext({ baseURL, storageState: authFile });
   const page = await context.newPage();
-  const basePage = new BasePage(page);
+  const portalTitle = page.getByRole('link', { name: /Vendor Portal/i });
 
-  await basePage.goto(vendorPortal.routes.dashboard).catch(() => {});
-  const isAuthenticated = await basePage.portalTitle
-    .isVisible({ timeout: 5000 })
-    .catch(() => false);
-  const currentUrl = page.url();
+  try {
+    await page.goto(vendorPortal.routes.dashboard, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    const isAuthenticated = await portalTitle
+      .isVisible({ timeout: 8000 })
+      .catch(() => false);
 
-  await context.close();
-
-  return isAuthenticated && currentUrl.includes(vendorPortal.routes.dashboard);
+    return isAuthenticated && page.url().includes(vendorPortal.routes.dashboard);
+  } catch {
+    return false;
+  } finally {
+    await context.close().catch(() => {});
+  }
 }
 
 export const test = base.extend({
   authStorageState: [
     async ({ browser }, use) => {
-      if (!(await authStateWorks(browser))) {
+      if (process.env.CI || !(await authStateWorks(browser))) {
         await writeFreshAuthState(browser);
+      }
+
+      if (!(await authStateWorks(browser))) {
+        throw new Error('Unable to create a reusable authenticated vendor portal session.');
       }
 
       await use(authFile);
     },
-    { scope: 'worker' },
+    { scope: 'worker', timeout: 180000 },
   ],
 
-  authenticatedPage: async ({ browser, authStorageState }, use) => {
-    const context = await browser.newContext({ baseURL, storageState: authStorageState });
+  authenticatedPage: async ({ browser }, use) => {
+    const context = await browser.newContext({ baseURL });
     const page = await context.newPage();
+    const loginPage = new LoginPage(page);
     const basePage = new BasePage(page);
 
-    await basePage.goto(vendorPortal.routes.dashboard);
-    await use(page);
-    await context.close();
+    try {
+      await loginPage.goto();
+      await loginPage.login();
+      await basePage.goto(vendorPortal.routes.dashboard);
+      await use(page);
+    } finally {
+      await context.close().catch(() => {});
+    }
   },
 });
 

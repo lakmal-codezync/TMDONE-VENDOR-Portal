@@ -100,9 +100,13 @@ test.describe('System Coverage', () => {
   let context;
   let page;
 
-  test.beforeEach(async ({ browser, authStorageState }) => {
-    context = await browser.newContext({ baseURL, storageState: authStorageState });
+  test.beforeEach(async ({ browser }) => {
+    context = await browser.newContext({ baseURL });
     page = await context.newPage();
+    const loginPage = new LoginPage(page);
+
+    await loginPage.goto();
+    await loginPage.login();
     await page.goto(routeUrl(vendorPortal.routes.dashboard), { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
     await ensureAuthenticatedShell(page);

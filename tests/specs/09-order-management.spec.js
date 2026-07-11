@@ -1,5 +1,6 @@
 import { test } from '../fixtures/vendorPortalFixture.js';
 import { OrdersManagementPage } from '../pages/OrdersManagementPage.js';
+import { LoginPage } from '../pages/LoginPage.js';
 
 const baseURL = process.env.VENDOR_PORTAL_BASE_URL || 'https://partner.demo.dr.tmd1.org';
 
@@ -10,9 +11,13 @@ test.describe('Order Management', () => {
   let page;
   let ordersManagementPage;
 
-  test.beforeAll(async ({ browser, authStorageState }) => {
-    context = await browser.newContext({ baseURL, storageState: authStorageState });
+  test.beforeAll(async ({ browser }) => {
+    context = await browser.newContext({ baseURL });
     page = await context.newPage();
+    const loginPage = new LoginPage(page);
+
+    await loginPage.goto();
+    await loginPage.login();
     ordersManagementPage = new OrdersManagementPage(page);
   });
 

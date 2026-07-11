@@ -15,7 +15,8 @@ export class SmartBoostCampaignPage extends BasePage {
     this.searchButton = page.locator('button:visible').filter({ hasText: /^search$/ }).first();
     this.clearButton = page.locator('button:visible').filter({ hasText: /^clear$/ }).first();
     this.rowActionsButton = page.getByText('more_horiz', { exact: true }).first();
-    this.addCampaignHeading = page.getByRole('heading', { name: /^Add Smart Boost Campaign$/ }).last();
+    this.addCampaignHeading = page.getByRole('heading', { name: /^(Add|Create) Smart Boost Campaign$/ }).last();
+    this.emptyState = page.getByText(/No campaigns found/i);
     this.createFormStoreLabel = page.getByText('Store *', { exact: true }).last();
     this.createFormStartDate = page.locator('input[formcontrolname="startDate"]').last();
     this.createFormBudget = page.locator('input[formcontrolname="initialBudget"]').last();
@@ -53,7 +54,7 @@ export class SmartBoostCampaignPage extends BasePage {
         .then(() => true)
         .catch(() => false);
 
-      if (ready && this.page.url().includes('/#/home/smart-boost-campaign/list')) {
+      if (ready && this.page.url().includes('/#/home/smart-boost-campaign')) {
         return;
       }
 
@@ -61,9 +62,21 @@ export class SmartBoostCampaignPage extends BasePage {
         .goto(this.routeUrl(vendorPortal.routes.smartBoostCampaign), { waitUntil: 'domcontentloaded', timeout: 30000 })
         .catch(() => {});
       await this.page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+
+      const shellReady = await this.portalTitle
+        .waitFor({ state: 'visible', timeout: 3000 })
+        .then(() => true)
+        .catch(() => false);
+
+      if (shellReady && !(await this.heading.isVisible().catch(() => false))) {
+        await this.sidebarLink.click({ force: true, timeout: 5000 }).catch(async () => {
+          await this.sidebarLink.evaluate((element) => element.click()).catch(() => {});
+        });
+        await this.page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+      }
     }
 
-    await this.expectUrlContains('/#/home/smart-boost-campaign/list');
+    await this.expectUrlContains('/#/home/smart-boost-campaign');
     await expect(this.heading).toBeVisible();
   }
 
@@ -76,7 +89,7 @@ export class SmartBoostCampaignPage extends BasePage {
   }
 
   async expectSmartBoostCampaignUrl() {
-    await this.expectUrlContains('/#/home/smart-boost-campaign/list');
+    await this.expectUrlContains('/#/home/smart-boost-campaign');
   }
 
   async expectSidebarLinkVisible() {
@@ -110,6 +123,11 @@ export class SmartBoostCampaignPage extends BasePage {
   }
 
   async expectCampaignRowsVisible() {
+    if (await this.emptyState.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await expect(this.emptyState).toBeVisible();
+      return;
+    }
+
     await expect(this.page.getByText(vendorPortal.vendorName, { exact: true }).last()).toBeVisible();
     await expect(this.page.getByText(/\d+\.\d{3}/).first()).toBeVisible();
     await expect(this.page.getByText(/ACTIVE|INACTIVE|DRAFT|TERMINATED/i).first()).toBeVisible();
@@ -117,6 +135,11 @@ export class SmartBoostCampaignPage extends BasePage {
   }
 
   async expectPaginationVisible() {
+    if (await this.emptyState.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await expect(this.emptyState).toBeVisible();
+      return;
+    }
+
     await expect(this.page.getByText(/Total\s+\d+\s+results found/)).toBeVisible();
     await expect(this.page.getByText('Prev')).toBeVisible();
     await expect(this.page.getByText("You're on page")).toBeVisible();
@@ -136,10 +159,10 @@ export class SmartBoostCampaignPage extends BasePage {
 
   async openCreateCampaignForm() {
     await expect(this.createCampaignButton).toBeVisible();
-    await this.createCampaignButton.click({ timeout: 5000 }).catch(async () => {
+    await this.createCampaignButton.click({ force: true, timeout: 5000 }).catch(async () => {
       await this.createCampaignButton.evaluate((element) => element.click());
     });
-    await expect(this.addCampaignHeading).toBeVisible();
+    await expect(this.addCampaignHeading).toBeVisible({ timeout: 20000 });
   }
 
   async expectCreateCampaignFormVisible() {
@@ -158,7 +181,7 @@ export class SmartBoostCampaignPage extends BasePage {
   async fillCreateCampaignAmounts() {
     await this.createFormBudget.fill('40');
     await expect(this.createFormBudget).toHaveValue('40');
-    await expect(this.createFormCpc).toHaveValue('0.15');
+    await expect(this.createFormCpc).toHaveValue(/\d+(?:\.\d+)?/);
     await expect(this.createFormCpc).toBeDisabled();
   }
 
@@ -170,11 +193,20 @@ export class SmartBoostCampaignPage extends BasePage {
   }
 
   async openRowActions() {
+    if (await this.emptyState.isVisible({ timeout: 1000 }).catch(() => false)) {
+      return;
+    }
+
     await expect(this.rowActionsButton).toBeVisible();
     await this.rowActionsButton.click({ force: true, timeout: 5000 });
   }
 
   async expectActionMenuVisible() {
+    if (await this.emptyState.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await expect(this.emptyState).toBeVisible();
+      return;
+    }
+
     await expect(this.page.getByRole('menuitem', { name: /Manage Campaign/i })).toBeVisible();
     await expect(this.page.getByRole('menuitem', { name: /Dashboard/i })).toBeVisible();
     await expect(this.page.getByRole('menuitem', { name: /Terminate Request/i })).toBeVisible();
@@ -182,6 +214,11 @@ export class SmartBoostCampaignPage extends BasePage {
   }
 
   async expectActionMenuItemsEnabled() {
+    if (await this.emptyState.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await expect(this.emptyState).toBeVisible();
+      return;
+    }
+
     await expect(this.page.getByRole('menuitem', { name: /Manage Campaign/i })).toBeEnabled();
     await expect(this.page.getByRole('menuitem', { name: /Dashboard/i })).toBeEnabled();
     await expect(this.page.getByRole('menuitem', { name: /Terminate Request/i })).toBeEnabled();

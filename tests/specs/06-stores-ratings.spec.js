@@ -1,5 +1,8 @@
 import { test } from '../fixtures/vendorPortalFixture.js';
 import { StoresRatingsPage } from '../pages/StoresRatingsPage.js';
+import { LoginPage } from '../pages/LoginPage.js';
+
+const baseURL = process.env.VENDOR_PORTAL_BASE_URL || 'https://partner.demo.dr.tmd1.org';
 
 test.describe('Stores Ratings', () => {
   test.describe.configure({ mode: 'serial', timeout: 120000 });
@@ -8,9 +11,13 @@ test.describe('Stores Ratings', () => {
   let page;
   let storesRatingsPage;
 
-  test.beforeAll(async ({ browser, authStorageState }) => {
-    context = await browser.newContext({ storageState: authStorageState });
+  test.beforeAll(async ({ browser }) => {
+    context = await browser.newContext({ baseURL });
     page = await context.newPage();
+    const loginPage = new LoginPage(page);
+
+    await loginPage.goto();
+    await loginPage.login();
     storesRatingsPage = new StoresRatingsPage(page);
   });
 
