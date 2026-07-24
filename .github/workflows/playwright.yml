@@ -1,46 +1,32 @@
-name: Playwright Tests
+name: Daily Playwright System Run
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   schedule:
-    # Runs daily at 02:00 Asia/Colombo (20:30 UTC).
+    # Runs every day at 2:00 AM Asia/Colombo time.
+    # GitHub Actions schedules are in UTC, so 2:00 AM SLST = 8:30 PM UTC.
     - cron: '30 20 * * *'
   workflow_dispatch:
 
 jobs:
-  test:
-    name: E2E Tests (${{ matrix.shard }})
-    timeout-minutes: 360
+  system-tests:
+    name: Run full Playwright system tests
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - shard: 1/4
-            shard-name: shard-1
-          - shard: 2/4
-            shard-name: shard-2
-          - shard: 3/4
-            shard-name: shard-3
-          - shard: 4/4
-            shard-name: shard-4
+    timeout-minutes: 360
 
     env:
-      VENDOR_PORTAL_BASE_URL: ${{ secrets.VENDOR_PORTAL_BASE_URL || 'https://partner.demo.dr.tmd1.org' }}
       VENDOR_PORTAL_USERNAME: ${{ secrets.VENDOR_PORTAL_USERNAME }}
       VENDOR_PORTAL_PASSWORD: ${{ secrets.VENDOR_PORTAL_PASSWORD }}
+      VENDOR_PORTAL_BASE_URL: ${{ secrets.VENDOR_PORTAL_BASE_URL || 'https://partner.demo.dr.tmd1.org' }}
+      CI: true
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -49,21 +35,21 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run Playwright tests
-        run: npm run test:ci -- --shard=${{ matrix.shard }}
+      - name: Run full system test suite
+        run: npm run test:all
 
       - name: Upload Playwright report
+        if: always()
         uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
         with:
-          name: playwright-report-${{ matrix.shard-name }}
+          name: playwright-report
           path: playwright-report/
-          retention-days: 30
+          retention-days: 14
 
       - name: Upload test results
+        if: always()
         uses: actions/upload-artifact@v4
-        if: ${{ failure() }}
         with:
-          name: test-results-${{ matrix.shard-name }}
+          name: test-results
           path: test-results/
           retention-days: 14
