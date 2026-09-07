@@ -36,7 +36,26 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run full system test suite
-        run: npm run test:all
+        run: npm test
+
+      - name: Build email summary
+        id: summary
+        if: always()
+        run: node .github/scripts/build-email-summary.mjs
+
+      - name: Email daily test results
+        if: always()
+        continue-on-error: true
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.GMAIL_ADDRESS }}
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          subject: ${{ steps.summary.outputs.subject }}
+          to: lakmal@codezync.com,miyuru@codezync.com,dulara@codezync.com
+          from: TMDone Vendor Portal Playwright CI <${{ secrets.GMAIL_ADDRESS }}>
+          html_body: file://email-summary.html
 
       - name: Upload Playwright report
         if: always()

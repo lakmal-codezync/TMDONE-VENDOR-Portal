@@ -82,4 +82,13 @@ For GitHub Actions, add these as repository secrets:
 
 ## CI/CD
 
-GitHub Actions runs the Playwright suite on pushes and pull requests to `main`. The workflow installs dependencies, installs Chromium, runs the tests, and uploads the Playwright report as an artifact.
+`.github/workflows/playwright.yml` runs the full suite automatically every day at **2:00 AM Asia/Colombo time** (8:30 PM UTC), and can also be triggered manually from the Actions tab (`workflow_dispatch`).
+
+After the run, it emails a results summary via Gmail SMTP - one table per spec file listing each test's **Test ID**, **description**, and **status** (pass/fail/flaky/skipped), plus overall pass/fail counts. The summary is built by `.github/scripts/build-email-summary.mjs` from the JSON reporter output.
+
+To enable the email step, set these repository secrets:
+
+- `GMAIL_ADDRESS` - the Gmail address to send from
+- `GMAIL_APP_PASSWORD` - a Google Account [App Password](https://myaccount.google.com/apppasswords) for that address (requires 2-Step Verification)
+
+The HTML report and raw test results are also uploaded as workflow artifacts (14-day retention) regardless of whether the email sends.
