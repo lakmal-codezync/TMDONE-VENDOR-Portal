@@ -4,7 +4,7 @@ export const vendorCredentials = {
 };
 
 export const vendorPortal = {
-  vendorName: 'Cafe Asiana',
+  vendorName: 'Food House',
   baseHash: '#/home',
   routes: {
     signIn: '/#/authentication/signin',
