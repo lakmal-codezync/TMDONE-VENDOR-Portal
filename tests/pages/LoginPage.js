@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { vendorCredentials, vendorPortal } from '../data/vendorPortalData.js';
 
 export class LoginPage {
@@ -54,6 +54,13 @@ export class LoginPage {
   }
 
   async login(username = vendorCredentials.username, password = vendorCredentials.password) {
+    if (!username || !password) {
+      test.skip(
+        true,
+        'Set VENDOR_PORTAL_USERNAME and VENDOR_PORTAL_PASSWORD (.env, environment variable, or GitHub Actions secret) before running vendor-portal tests.'
+      );
+    }
+
     await this.fillCredentials(username, password);
     await this.submitExpectingSuccess();
   }

@@ -1,6 +1,6 @@
 export const vendorCredentials = {
-  username: process.env.VENDOR_PORTAL_USERNAME || 'arshaka@gmail.com',
-  password: process.env.VENDOR_PORTAL_PASSWORD || '123123',
+  username: process.env.VENDOR_PORTAL_USERNAME || '',
+  password: process.env.VENDOR_PORTAL_PASSWORD || '',
 };
 
 export const vendorPortal = {
