@@ -13,9 +13,9 @@ export const vendorPortal = {
     branchDetails: '/#/home/stores',
     ordersManagement: '/#/home/orders',
     menuManagement:
-      '/#/home/menu?type=0&storeId=5e7a06b28cbfe934c02dacc5&sectorId=5e2b82a68cbfe31a8cd09c64',
+      '/#/home/menu?type=0&storeId=634545068cbfe448e06c0e9b&sectorId=5e2b82a68cbfe31a8cd09c64',
     storeRatings: '/#/home/storeRatings',
-    storeRatingsSummary: '/#/home/storeRatings/summary?StoreId=5e7a06b28cbfe934c02dacc5&storeName=Cafe%20Asiana',
+    storeRatingsSummary: '/#/home/storeRatings/summary?StoreId=634545068cbfe448e06c0e9b&storeName=Food%20House',
     reports: '/#/home/reports',
     smartBoostCampaign: '/#/home/smart-boost-campaign/list',
   },

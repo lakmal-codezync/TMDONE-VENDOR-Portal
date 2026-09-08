@@ -143,8 +143,8 @@ export class VendorPerformancePage extends BasePage {
   async expectTopSellingSectionsVisible() {
     await expect(this.page.getByRole('heading', { name: /Top Selling Items/ })).toBeVisible();
     await expect(this.page.getByRole('heading', { name: /Top Selling Areas/ })).toBeVisible();
-    await expect(this.page.getByRole('cell', { name: 'Item' })).toBeVisible();
-    await expect(this.page.getByRole('cell', { name: 'Count' }).first()).toBeVisible();
+    await expect(this.page.getByRole('columnheader', { name: 'Item' })).toBeVisible();
+    await expect(this.page.getByRole('columnheader', { name: 'Count' }).first()).toBeVisible();
     await expect(this.page.getByText(vendorPortal.vendorName).first()).toBeVisible();
   }
 

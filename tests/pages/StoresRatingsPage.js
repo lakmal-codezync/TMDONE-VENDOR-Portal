@@ -13,7 +13,7 @@ export class StoresRatingsPage extends BasePage {
     this.exportButton = page.locator('button:visible').filter({ hasText: /^file_download$/ });
     this.clearButton = page.locator('button:visible').filter({ hasText: /^close$/ });
     this.searchButton = page.locator('button:visible').filter({ hasText: /^search$/ });
-    this.viewButton = page.getByRole('row', { name: /Cafe Asiana/ }).locator('button').last();
+    this.viewButton = page.getByRole('row', { name: vendorPortal.vendorName }).locator('button').last();
     this.summarySearchLabel = page.getByText('Search By Order No or Tags', { exact: true });
     this.summarySearchInput = page.getByRole('textbox', { name: /Search/i }).last();
   }

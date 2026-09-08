@@ -16,7 +16,7 @@ jobs:
     env:
       VENDOR_PORTAL_USERNAME: ${{ secrets.VENDOR_PORTAL_USERNAME }}
       VENDOR_PORTAL_PASSWORD: ${{ secrets.VENDOR_PORTAL_PASSWORD }}
-      VENDOR_PORTAL_BASE_URL: ${{ secrets.VENDOR_PORTAL_BASE_URL || 'https://partner.uat.v3.dr.tmd1.org/#/authentication/signin' }}
+      VENDOR_PORTAL_BASE_URL: ${{ secrets.VENDOR_PORTAL_BASE_URL || 'https://partner.uat.v3.dr.tmd1.org' }}
       CI: true
 
     steps:

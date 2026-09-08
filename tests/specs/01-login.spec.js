@@ -32,7 +32,7 @@ test.describe('Login', () => {
     await loginPage.login();
 
     await dashboardPage.expectLoaded();
-    await expect(page.getByText('Cafe Asiana').first()).toBeVisible();
+    await expect(page.getByText(vendorPortal.vendorName).first()).toBeVisible();
   });
 
   test('TC_LOGIN_003 @login-enter vendor user can sign in by pressing Enter from password field', async ({

@@ -101,8 +101,8 @@ export class BranchDetailsPage extends BasePage {
 
   async expectBranchRowVisible() {
     await expect(this.branchNameCell).toBeVisible();
-    await expect(this.page.getByText(/Aneef Fashir\s*-\s*773260111/)).toBeVisible();
-    await expect(this.page.getByText(/All Days\s*:\s*From\s*07:00 AM\s*To\s*03:00 AM/)).toBeVisible();
+    await expect(this.page.getByText(/test foods\s*-\s*754215984/)).toBeVisible();
+    await expect(this.page.getByText(/All Days\s*:\s*From\s*01:00 AM\s*To\s*01:00 AM/)).toBeVisible();
     await expect(this.onlineStatus).toBeVisible();
   }
 
