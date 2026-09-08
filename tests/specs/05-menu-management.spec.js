@@ -11,7 +11,7 @@ const uniqueMenuItem = () => {
     arabicDescription: `Automated Arabic description ${suffix}`,
     sku: `AUTO${suffix}`,
     price: '1.250',
-    category: 'Appetizers',
+    category: 'Milkshakes',
     orderType: 'Delivery',
   };
 };
@@ -66,7 +66,7 @@ test.describe('Menu Management', () => {
     const menuManagementPage = new MenuManagementPage(authenticatedPage);
 
     await menuManagementPage.expectCategoryRowsVisible();
-    await menuManagementPage.expectCategoryVisible('Appetizers');
+    await menuManagementPage.expectCategoryVisible('Cocktail');
   });
 
   test('TC_MENU_MANAGEMENT_006 @menu-categories-actions category row actions are visible', async ({
@@ -82,8 +82,8 @@ test.describe('Menu Management', () => {
   }) => {
     const menuManagementPage = new MenuManagementPage(authenticatedPage);
 
-    await menuManagementPage.searchCategory('Appetizers');
-    await menuManagementPage.expectCategoryVisible('Appetizers');
+    await menuManagementPage.searchCategory('Cocktail');
+    await menuManagementPage.expectCategoryVisible('Cocktail');
   });
 
   test('TC_MENU_MANAGEMENT_008 @menu-items-table item management table columns are visible', async ({
@@ -124,8 +124,8 @@ test.describe('Menu Management', () => {
     const menuManagementPage = new MenuManagementPage(authenticatedPage);
 
     await menuManagementPage.openItemManagement();
-    await menuManagementPage.searchItem('Cheetos Fries');
-    await menuManagementPage.expectCategoryVisible('Cheetos Fries');
+    await menuManagementPage.searchItem('Nutella Waffle');
+    await menuManagementPage.expectCategoryVisible('Nutella Waffle');
   });
 
   test('TC_MENU_MANAGEMENT_013 @menu-items-pagination item pagination is visible', async ({ authenticatedPage }) => {
@@ -191,6 +191,7 @@ test.describe('Menu Management', () => {
     await menuManagementPage.openItemManagement();
     await menuManagementPage.openEditItemForm();
     await menuManagementPage.expectItemFormVisible('Update');
+    await menuManagementPage.fieldByPlaceholder('Enter Selling price').fill('9.999');
     await menuManagementPage.expectCategoryFormCanSubmit('Update');
     await menuManagementPage.cancelForm();
   });

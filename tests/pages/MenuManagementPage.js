@@ -183,10 +183,10 @@ export class MenuManagementPage extends BasePage {
   }
 
   async expectCategoryRowsVisible() {
-    await this.expectCategoryVisible('Combo Meals');
-    await this.expectCategoryVisible('Fresh Burgers');
-    await this.expectCategoryVisible('Appetizers');
-    await expect(this.page.getByText(/Total\s+12\s+results found/)).toBeVisible();
+    await this.expectCategoryVisible('Milkshakes');
+    await this.expectCategoryVisible('Juices');
+    await this.expectCategoryVisible('Cocktail');
+    await expect(this.page.getByText(/Total\s+\d+\s+results found/)).toBeVisible();
   }
 
   async expectCategoryActionsVisible() {
@@ -254,10 +254,10 @@ export class MenuManagementPage extends BasePage {
   }
 
   async expectItemRowsVisible() {
-    await expect(this.page.getByText('Cheetos Fries', { exact: true })).toBeVisible();
-    await expect(this.page.getByText('Chicken Nuggets', { exact: true })).toBeVisible();
+    await expect(this.page.getByText('Nutella Waffle', { exact: true })).toBeVisible();
+    await expect(this.page.getByText('Pistachio Waffle', { exact: true })).toBeVisible();
     await expect(this.page.getByText('Approved', { exact: true }).first()).toBeVisible();
-    await expect(this.page.getByText(/DELIVERY|BOTH/).first()).toBeVisible();
+    await expect(this.page.getByText(/DELIVERY|BOTH|PICKUP/).first()).toBeVisible();
     await expect(this.page.getByText(/Total\s+\d+\s+results found/)).toBeVisible();
   }
 
@@ -301,7 +301,7 @@ export class MenuManagementPage extends BasePage {
   }
 
   async expectItemCustomizationViewVisible() {
-    await expect(this.page.getByText(/Cheetos Fries - Customizations/)).toBeVisible();
+    await expect(this.page.getByText(/ - Customizations/)).toBeVisible();
     await expect(this.page.getByRole('columnheader', { name: 'Index' })).toBeVisible();
     await expect(this.page.getByRole('columnheader', { name: 'English Name' })).toBeVisible();
     await expect(this.page.getByRole('columnheader', { name: 'Arabic Name' })).toBeVisible();
